@@ -9,52 +9,38 @@ use Staxxer\OAuth2\Client\Provider\MoneybirdResourceOwner;
 
 class MoneybirdResourceOwnerTest extends TestCase
 {
-    public function testGetIdReturnsFirstAdministrationId(): void
+    public function testGetId(): void
     {
         $owner = new MoneybirdResourceOwner([
-            ['id' => 123456789, 'name' => 'Test Administration'],
-            ['id' => 987654321, 'name' => 'Other Administration'],
+            'id' => 123456789,
+            'name' => 'Test Administration',
         ]);
 
         self::assertSame('123456789', $owner->getId());
     }
 
-    public function testGetIdReturnsNullWhenEmpty(): void
-    {
-        $owner = new MoneybirdResourceOwner([]);
-
-        self::assertNull($owner->getId());
-    }
-
-    public function testGetIdReturnsNullWhenNoIdInFirstEntry(): void
+    public function testGetName(): void
     {
         $owner = new MoneybirdResourceOwner([
-            ['name' => 'Test Administration'],
+            'id' => 123456789,
+            'name' => 'Test Administration',
         ]);
 
-        self::assertNull($owner->getId());
+        self::assertSame('Test Administration', $owner->getName());
     }
 
-    public function testGetAdministrations(): void
+    public function testToArray(): void
     {
-        $administrations = [
-            ['id' => 123456789, 'name' => 'Test Administration'],
-            ['id' => 987654321, 'name' => 'Other Administration'],
+        $administration = [
+            'id' => 123456789,
+            'name' => 'Test Administration',
+            'language' => 'nl',
+            'currency' => 'EUR',
+            'country' => 'NL',
         ];
 
-        $owner = new MoneybirdResourceOwner($administrations);
+        $owner = new MoneybirdResourceOwner($administration);
 
-        self::assertSame($administrations, $owner->getAdministrations());
-    }
-
-    public function testToArrayReturnsAdministrations(): void
-    {
-        $administrations = [
-            ['id' => 123456789, 'name' => 'Test Administration'],
-        ];
-
-        $owner = new MoneybirdResourceOwner($administrations);
-
-        self::assertSame($administrations, $owner->toArray());
+        self::assertSame($administration, $owner->toArray());
     }
 }

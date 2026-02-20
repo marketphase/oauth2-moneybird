@@ -10,6 +10,7 @@ use League\OAuth2\Client\Token\AccessToken;
 use League\OAuth2\Client\Tool\BearerAuthorizationTrait;
 use Override;
 use Psr\Http\Message\ResponseInterface;
+use RuntimeException;
 use Staxxer\OAuth2\Client\Provider\Exception\MoneybirdIdentityProviderException;
 
 class Moneybird extends AbstractProvider
@@ -65,7 +66,14 @@ class Moneybird extends AbstractProvider
         array $response,
         AccessToken $token,
     ): ResourceOwnerInterface {
-        return new MoneybirdResourceOwner($response);
+        if (count($response) !== 1) {
+            throw new RuntimeException(sprintf(
+                'Expected exactly one Moneybird administration, got %d',
+                count($response),
+            ));
+        }
+
+        return new MoneybirdResourceOwner($response[0]);
     }
 
     /**

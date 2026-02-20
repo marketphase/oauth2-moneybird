@@ -11,6 +11,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
+use RuntimeException;
 use Staxxer\OAuth2\Client\Provider\Moneybird;
 use Staxxer\OAuth2\Client\Provider\MoneybirdResourceOwner;
 
@@ -95,7 +96,6 @@ class MoneybirdTest extends TestCase
 
         $administrations = [
             ['id' => 123456789, 'name' => 'Test Administration'],
-            ['id' => 987654321, 'name' => 'Other Administration'],
         ];
 
         $resourceOwnerResponse = $this->createMockResponse(200, json_encode($administrations));
@@ -114,6 +114,62 @@ class MoneybirdTest extends TestCase
 
         self::assertInstanceOf(MoneybirdResourceOwner::class, $resourceOwner);
         self::assertSame('123456789', $resourceOwner->getId());
+        self::assertSame('Test Administration', $resourceOwner->getName());
+    }
+
+    public function testGetResourceOwnerThrowsWhenMultipleAdministrations(): void
+    {
+        $tokenResponse = $this->createMockResponse(200, json_encode([
+            'access_token' => 'mock_access_token',
+            'token_type' => 'bearer',
+        ]));
+
+        $administrations = [
+            ['id' => 123456789, 'name' => 'First'],
+            ['id' => 987654321, 'name' => 'Second'],
+        ];
+
+        $resourceOwnerResponse = $this->createMockResponse(200, json_encode($administrations));
+
+        $client = $this->createMock(ClientInterface::class);
+        $client->method('send')
+            ->willReturnOnConsecutiveCalls($tokenResponse, $resourceOwnerResponse);
+
+        $this->provider->setHttpClient($client);
+
+        $token = $this->provider->getAccessToken('authorization_code', [
+            'code' => 'mock_authorization_code',
+        ]);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Expected exactly one Moneybird administration, got 2');
+
+        $this->provider->getResourceOwner($token);
+    }
+
+    public function testGetResourceOwnerThrowsWhenNoAdministrations(): void
+    {
+        $tokenResponse = $this->createMockResponse(200, json_encode([
+            'access_token' => 'mock_access_token',
+            'token_type' => 'bearer',
+        ]));
+
+        $resourceOwnerResponse = $this->createMockResponse(200, json_encode([]));
+
+        $client = $this->createMock(ClientInterface::class);
+        $client->method('send')
+            ->willReturnOnConsecutiveCalls($tokenResponse, $resourceOwnerResponse);
+
+        $this->provider->setHttpClient($client);
+
+        $token = $this->provider->getAccessToken('authorization_code', [
+            'code' => 'mock_authorization_code',
+        ]);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Expected exactly one Moneybird administration, got 0');
+
+        $this->provider->getResourceOwner($token);
     }
 
     public function testClientErrorThrowsException(): void
@@ -176,7 +232,9 @@ class MoneybirdTest extends TestCase
             'token_type' => 'bearer',
         ]));
 
-        $resourceOwnerResponse = $this->createMockResponse(200, json_encode([]));
+        $resourceOwnerResponse = $this->createMockResponse(200, json_encode([
+            ['id' => 123456789, 'name' => 'Test'],
+        ]));
 
         $client = $this->createMock(ClientInterface::class);
         $client->method('send')

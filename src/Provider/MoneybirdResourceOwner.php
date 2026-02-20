@@ -10,35 +10,30 @@ use Override;
 class MoneybirdResourceOwner implements ResourceOwnerInterface
 {
     /**
-     * @param array<int, array<string, mixed>> $administrations
+     * @param array<string, mixed> $administration
      */
     public function __construct(
-        private array $administrations,
+        private array $administration,
     ) {
     }
 
     #[Override]
-    public function getId(): ?string
+    public function getId(): string
     {
-        return isset($this->administrations[0]['id'])
-            ? (string) $this->administrations[0]['id']
-            : null;
+        return (string) $this->administration['id'];
+    }
+
+    public function getName(): string
+    {
+        return (string) $this->administration['name'];
     }
 
     /**
-     * @return array<int, array<string, mixed>>
+     * @return array<string, mixed>
      */
     #[Override]
     public function toArray(): array
     {
-        return $this->administrations;
-    }
-
-    /**
-     * @return array<int, array<string, mixed>>
-     */
-    public function getAdministrations(): array
-    {
-        return $this->administrations;
+        return $this->administration;
     }
 }
