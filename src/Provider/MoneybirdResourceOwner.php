@@ -5,34 +5,36 @@ declare(strict_types=1);
 namespace Staxxer\OAuth2\Client\Provider;
 
 use League\OAuth2\Client\Provider\ResourceOwnerInterface;
-use Override;
 
 class MoneybirdResourceOwner implements ResourceOwnerInterface
 {
     /**
+     * @var array<string, mixed>
+     */
+    private $administration;
+
+    /**
      * @param array<string, mixed> $administration
      */
-    public function __construct(
-        private array $administration,
-    ) {
+    public function __construct(array $administration)
+    {
+        $this->administration = $administration;
     }
 
-    #[Override]
-    public function getId(): string
+    public function getId()
     {
         return (string) $this->administration['id'];
     }
 
-    public function getName(): string
+    /**
+     * @return string
+     */
+    public function getName()
     {
         return (string) $this->administration['name'];
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    #[Override]
-    public function toArray(): array
+    public function toArray()
     {
         return $this->administration;
     }

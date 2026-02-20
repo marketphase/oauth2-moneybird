@@ -11,37 +11,39 @@ class MoneybirdIdentityProviderException extends IdentityProviderException
 {
     /**
      * @param mixed $data
+     * @return self
      */
-    public static function clientException(ResponseInterface $response, $data): self
+    public static function clientException(ResponseInterface $response, $data)
     {
         $message = $response->getReasonPhrase();
 
         if (is_array($data) && isset($data['error'])) {
-            $message = $data['error_description'] ?? $data['error'];
+            $message = isset($data['error_description']) ? $data['error_description'] : $data['error'];
         }
 
         return new self(
             (string) $message,
             $response->getStatusCode(),
-            (string) $response->getBody(),
+            (string) $response->getBody()
         );
     }
 
     /**
      * @param mixed $data
+     * @return self
      */
-    public static function oauthException(ResponseInterface $response, $data): self
+    public static function oauthException(ResponseInterface $response, $data)
     {
         $message = '';
 
         if (is_array($data)) {
-            $message = $data['error_description'] ?? $data['error'] ?? '';
+            $message = isset($data['error_description']) ? $data['error_description'] : (isset($data['error']) ? $data['error'] : '');
         }
 
         return new self(
             (string) $message,
             $response->getStatusCode(),
-            (string) $response->getBody(),
+            (string) $response->getBody()
         );
     }
 }

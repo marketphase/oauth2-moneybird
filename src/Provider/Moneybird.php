@@ -8,7 +8,6 @@ use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\ResourceOwnerInterface;
 use League\OAuth2\Client\Token\AccessToken;
 use League\OAuth2\Client\Tool\BearerAuthorizationTrait;
-use Override;
 use Psr\Http\Message\ResponseInterface;
 use RuntimeException;
 use Staxxer\OAuth2\Client\Provider\Exception\MoneybirdIdentityProviderException;
@@ -17,40 +16,34 @@ class Moneybird extends AbstractProvider
 {
     use BearerAuthorizationTrait;
 
-    public const string BASE_URL = 'https://moneybird.com';
+    const BASE_URL = 'https://moneybird.com';
 
-    #[Override]
-    public function getBaseAuthorizationUrl(): string
+    public function getBaseAuthorizationUrl()
     {
         return self::BASE_URL . '/oauth/authorize';
     }
 
-    #[Override]
-    public function getBaseAccessTokenUrl(array $params): string
+    public function getBaseAccessTokenUrl(array $params)
     {
         return self::BASE_URL . '/oauth/token';
     }
 
-    #[Override]
-    public function getResourceOwnerDetailsUrl(AccessToken $token): string
+    public function getResourceOwnerDetailsUrl(AccessToken $token)
     {
         return self::BASE_URL . '/api/v2/administrations.json';
     }
 
-    #[Override]
-    protected function getDefaultScopes(): array
+    protected function getDefaultScopes()
     {
         return ['sales_invoices'];
     }
 
-    #[Override]
-    protected function getScopeSeparator(): string
+    protected function getScopeSeparator()
     {
         return ' ';
     }
 
-    #[Override]
-    protected function checkResponse(ResponseInterface $response, $data): void
+    protected function checkResponse(ResponseInterface $response, $data)
     {
         if ($response->getStatusCode() >= 400) {
             throw MoneybirdIdentityProviderException::clientException($response, $data);
@@ -61,15 +54,12 @@ class Moneybird extends AbstractProvider
         }
     }
 
-    #[Override]
-    protected function createResourceOwner(
-        array $response,
-        AccessToken $token,
-    ): ResourceOwnerInterface {
+    protected function createResourceOwner(array $response, AccessToken $token)
+    {
         if (count($response) !== 1) {
             throw new RuntimeException(sprintf(
                 'Expected exactly one Moneybird administration, got %d',
-                count($response),
+                count($response)
             ));
         }
 
@@ -79,8 +69,7 @@ class Moneybird extends AbstractProvider
     /**
      * @return array<string, string>
      */
-    #[Override]
-    protected function getDefaultHeaders(): array
+    protected function getDefaultHeaders()
     {
         return [
             'Accept' => 'application/json',

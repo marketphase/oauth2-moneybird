@@ -7,7 +7,6 @@ namespace Staxxer\OAuth2\Client\Test\Provider;
 use GuzzleHttp\ClientInterface;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
@@ -17,7 +16,7 @@ use Staxxer\OAuth2\Client\Provider\MoneybirdResourceOwner;
 
 class MoneybirdTest extends TestCase
 {
-    private Moneybird $provider;
+    private $provider;
 
     protected function setUp(): void
     {
@@ -100,9 +99,12 @@ class MoneybirdTest extends TestCase
 
         $resourceOwnerResponse = $this->createMockResponse(200, json_encode($administrations));
 
+        $responses = [$tokenResponse, $resourceOwnerResponse];
         $client = $this->createMock(ClientInterface::class);
         $client->method('send')
-            ->willReturnOnConsecutiveCalls($tokenResponse, $resourceOwnerResponse);
+            ->willReturnCallback(function () use (&$responses) {
+                return array_shift($responses);
+            });
 
         $this->provider->setHttpClient($client);
 
@@ -131,9 +133,12 @@ class MoneybirdTest extends TestCase
 
         $resourceOwnerResponse = $this->createMockResponse(200, json_encode($administrations));
 
+        $responses = [$tokenResponse, $resourceOwnerResponse];
         $client = $this->createMock(ClientInterface::class);
         $client->method('send')
-            ->willReturnOnConsecutiveCalls($tokenResponse, $resourceOwnerResponse);
+            ->willReturnCallback(function () use (&$responses) {
+                return array_shift($responses);
+            });
 
         $this->provider->setHttpClient($client);
 
@@ -156,9 +161,12 @@ class MoneybirdTest extends TestCase
 
         $resourceOwnerResponse = $this->createMockResponse(200, json_encode([]));
 
+        $responses = [$tokenResponse, $resourceOwnerResponse];
         $client = $this->createMock(ClientInterface::class);
         $client->method('send')
-            ->willReturnOnConsecutiveCalls($tokenResponse, $resourceOwnerResponse);
+            ->willReturnCallback(function () use (&$responses) {
+                return array_shift($responses);
+            });
 
         $this->provider->setHttpClient($client);
 
@@ -240,7 +248,7 @@ class MoneybirdTest extends TestCase
         $client->method('send')
             ->willReturnCallback(function ($request) use (&$tokenResponse, &$resourceOwnerResponse) {
                 $uri = (string) $request->getUri();
-                if (str_contains($uri, '/oauth/token')) {
+                if (strpos($uri, '/oauth/token') !== false) {
                     return $tokenResponse;
                 }
 
@@ -258,7 +266,10 @@ class MoneybirdTest extends TestCase
         $this->provider->getResourceOwner($token);
     }
 
-    private function createMockResponse(int $statusCode, string $body): ResponseInterface&MockObject
+    /**
+     * @return ResponseInterface|\PHPUnit\Framework\MockObject\MockObject
+     */
+    private function createMockResponse($statusCode, $body)
     {
         $stream = $this->createMock(StreamInterface::class);
         $stream->method('__toString')->willReturn($body);
@@ -273,7 +284,10 @@ class MoneybirdTest extends TestCase
         return $response;
     }
 
-    private function createMockHttpClient(ResponseInterface $response): ClientInterface&MockObject
+    /**
+     * @return ClientInterface|\PHPUnit\Framework\MockObject\MockObject
+     */
+    private function createMockHttpClient(ResponseInterface $response)
     {
         $client = $this->createMock(ClientInterface::class);
         $client->method('send')->willReturn($response);
