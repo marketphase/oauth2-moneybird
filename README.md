@@ -53,16 +53,16 @@ $token = $provider->getAccessToken('refresh_token', [
 ]);
 ```
 
-### Resource Owner (Administrations)
+### Resource Owner (Administration)
 
 ```php
 $resourceOwner = $provider->getResourceOwner($token);
 
-// First administration ID
+// Administration ID
 echo $resourceOwner->getId();
 
-// All administrations
-$administrations = $resourceOwner->getAdministrations();
+// Administration name
+echo $resourceOwner->getName();
 ```
 
 ## Testing
