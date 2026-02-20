@@ -4,7 +4,7 @@
     "license": "MIT",
     "keywords": ["oauth", "oauth2", "client", "moneybird", "bookkeeping"],
     "require": {
-        "php": "^8.2",
+        "php": "^8.3",
         "league/oauth2-client": "^2.0"
     },
     "require-dev": {
