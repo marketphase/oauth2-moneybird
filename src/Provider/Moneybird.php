@@ -18,32 +18,32 @@ class Moneybird extends AbstractProvider
 
     const BASE_URL = 'https://moneybird.com';
 
-    public function getBaseAuthorizationUrl()
+    public function getBaseAuthorizationUrl(): string
     {
         return self::BASE_URL . '/oauth/authorize';
     }
 
-    public function getBaseAccessTokenUrl(array $params)
+    public function getBaseAccessTokenUrl(array $params): string
     {
         return self::BASE_URL . '/oauth/token';
     }
 
-    public function getResourceOwnerDetailsUrl(AccessToken $token)
+    public function getResourceOwnerDetailsUrl(AccessToken $token): string
     {
         return self::BASE_URL . '/api/v2/administrations.json';
     }
 
-    protected function getDefaultScopes()
+    protected function getDefaultScopes(): array
     {
         return ['sales_invoices'];
     }
 
-    protected function getScopeSeparator()
+    protected function getScopeSeparator(): string
     {
         return ' ';
     }
 
-    protected function checkResponse(ResponseInterface $response, $data)
+    protected function checkResponse(ResponseInterface $response, $data): void
     {
         if ($response->getStatusCode() >= 400) {
             throw MoneybirdIdentityProviderException::clientException($response, $data);
@@ -54,7 +54,7 @@ class Moneybird extends AbstractProvider
         }
     }
 
-    protected function createResourceOwner(array $response, AccessToken $token)
+    protected function createResourceOwner(array $response, AccessToken $token): ResourceOwnerInterface
     {
         if (count($response) !== 1) {
             throw new RuntimeException(sprintf(
